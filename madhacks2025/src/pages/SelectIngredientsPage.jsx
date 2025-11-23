@@ -6,6 +6,7 @@ import { generateRecipes } from '../utils/recipeApi'
 
 const DETECT_INGREDIENTS_IMAGE_URL = 'http://localhost:3001/api/detect-ingredients' // Node.js for images
 const DETECT_INGREDIENTS_VIDEO_URL = 'http://localhost:8000/detect-ingredients' // Flask for videos
+const SPOONACULAR_IMAGE_URL = 'http://localhost:3001/api/spoonacular-image'
 
 const SelectIngredientsPage = () => {
   const [mediaFile, setMediaFile] = useState(null)
@@ -202,8 +203,46 @@ const SelectIngredientsPage = () => {
     setGeneratedRecipes(null)
 
     try {
+      // 1. Get recipes from OpenAI (no images yet / or Unsplash ignored)
       const recipes = await generateRecipes(ingredients)
-      setGeneratedRecipes(recipes)
+
+      // 2. For each recipe, call your Express + Spoonacular backend
+      const recipesWithImages = await Promise.all(
+        recipes.map(async (recipe) => {
+          const title =
+            recipe.recipeName ||
+            recipe.title ||
+            (typeof recipe === 'string' ? recipe : 'Recipe')
+
+          try {
+            const res = await fetch(
+              `${SPOONACULAR_IMAGE_URL}?title=${encodeURIComponent(title)}`
+            )
+
+            if (!res.ok) {
+              console.error('Spoonacular backend error:', res.status, res.statusText)
+              return { ...recipe } // no image, just return base recipe
+            }
+
+            const data = await res.json()
+            const imageUrl = data?.image || recipe.imageUrl || null
+
+            return {
+              ...recipe,
+              recipeName: recipe.recipeName || recipe.title || title,
+              imageUrl,
+            }
+          } catch (err) {
+            console.error('Error fetching recipe image:', err)
+            return {
+              ...recipe,
+              recipeName: recipe.recipeName || recipe.title || title,
+            }
+          }
+        })
+      )
+
+      setGeneratedRecipes(recipesWithImages)
     } catch (err) {
       setError(err.message || 'Failed to generate recipes. Please try again.')
       console.error('Error:', err)
@@ -211,6 +250,7 @@ const SelectIngredientsPage = () => {
       setIsLoadingRecipes(false)
     }
   }
+
 
   const getMediaType = () => {
     if (!mediaFile) return null

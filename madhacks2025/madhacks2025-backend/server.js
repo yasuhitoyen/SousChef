@@ -25,6 +25,34 @@ const upload = multer({
 
 
 
+
+// GET /api/spoonacular-image?title=Chicken Alfredo
+app.get("/api/spoonacular-image", async (req, res) => {
+  try {
+    const { title } = req.query;
+
+    if (!title) {
+      return res.status(400).json({ error: "Missing 'title' query parameter" });
+    }
+
+    const query = encodeURIComponent(title);
+
+    const url = `https://api.spoonacular.com/recipes/complexSearch?query=${query}&number=1&apiKey=${SPOONACULAR_API_KEY}`;
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data?.results?.length > 0) {
+      return res.json({ image: data.results[0].image });
+    }
+
+    return res.json({ image: null });
+  } catch (err) {
+    console.error("Spoonacular ERROR:", err);
+    return res.status(500).json({ error: "Failed to fetch image" });
+  }
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Voice generation service is running' });
