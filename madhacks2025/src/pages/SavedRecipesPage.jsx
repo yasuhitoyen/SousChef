@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { getSavedRecipes, removeRecipe } from '../utils/recipeStorage'
 import Recipe from '../components/Recipe'
+import { motion } from 'framer-motion'
 
 const SavedRecipesPage = () => {
   const { user } = useAuth()
@@ -68,16 +69,22 @@ const SavedRecipesPage = () => {
   if (!user) {
     return (
       <div className="max-w-4xl mx-auto">
-        <div className="bg-[#F7F3E9] rounded-2xl shadow-lg p-8 border border-[#E8DDC8] text-center">
-          <h2 className="text-2xl font-bold text-[#2C2416] mb-4">Please Login</h2>
-          <p className="text-[#5A4A3A] mb-6">You need to be logged in to view your saved recipes.</p>
-          <button
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-[#f5f8fa] rounded-3xl shadow-xl p-10 border-2 border-blue-300/50 text-center"
+        >
+          <h2 className="text-3xl font-bold text-blue-900 mb-4 font-serif">Please Login</h2>
+          <p className="text-blue-700/80 mb-6 text-lg">You need to be logged in to view your saved recipes.</p>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => navigate('/login')}
-            className="px-6 py-3 bg-[#D4A574] text-white rounded-lg hover:bg-[#C49564] transition-colors font-medium"
+            className="px-8 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl hover:from-blue-600 hover:to-cyan-600 transition-all font-semibold shadow-lg"
           >
             Go to Login
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
       </div>
     )
   }
@@ -85,66 +92,123 @@ const SavedRecipesPage = () => {
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto">
-        <div className="bg-[#F7F3E9] rounded-2xl shadow-lg p-8 border border-[#E8DDC8] text-center">
-          <div className="flex items-center justify-center">
-            <svg className="animate-spin h-8 w-8 text-[#D4A574]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-          </div>
-          <p className="mt-4 text-[#5A4A3A]">Loading saved recipes...</p>
-        </div>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="bg-[#f5f8fa] rounded-3xl shadow-xl p-12 border-2 border-blue-300/50 text-center"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="flex items-center justify-center mb-4"
+          >
+            <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-500 rounded-full"></div>
+          </motion.div>
+          <p className="text-blue-700/80 text-lg font-medium">Loading saved recipes...</p>
+        </motion.div>
       </div>
     )
   }
 
   return (
     <div className="max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-[#2C2416] mb-2">Saved Recipes</h1>
-        <p className="text-[#5A4A3A] text-lg">
-          {savedRecipes.length === 0 
-            ? "You haven't saved any recipes yet. Start cooking and save your favorites!"
-            : `You have ${savedRecipes.length} saved recipe${savedRecipes.length !== 1 ? 's' : ''}`
-          }
-        </p>
-      </div>
+      {/* Header Section */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mb-10"
+      >
+        <div className="flex items-center gap-4 mb-4">
+          <motion.div
+            animate={{ rotate: [0, 10, -10, 0] }}
+            transition={{ duration: 2, repeat: Infinity, repeatDelay: 2 }}
+            className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg"
+          >
+            <span className="text-3xl">⭐</span>
+          </motion.div>
+          <div>
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent font-serif mb-2">
+              Saved Recipes
+            </h1>
+            <p className="text-blue-700/80 text-lg">
+              {savedRecipes.length === 0 
+                ? "Your favorite recipes will appear here"
+                : `You have ${savedRecipes.length} saved recipe${savedRecipes.length !== 1 ? 's' : ''}`
+              }
+            </p>
+          </div>
+        </div>
+      </motion.div>
 
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-xl text-red-700"
+        >
           {error}
-        </div>
+        </motion.div>
       )}
 
       {savedRecipes.length === 0 ? (
-        <div className="bg-[#F7F3E9] rounded-2xl shadow-lg p-12 border border-[#E8DDC8] text-center">
-          <h2 className="text-2xl font-bold text-[#2C2416] mb-2">No Saved Recipes</h2>
-          <p className="text-[#5A4A3A] mb-6">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-[#f5f8fa] rounded-3xl shadow-xl p-16 border-2 border-blue-300/50 text-center"
+        >
+          <motion.div
+            animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="text-8xl mb-6"
+          >
+            ⭐
+          </motion.div>
+          <h2 className="text-3xl font-bold text-blue-900 mb-4 font-serif">No Saved Recipes Yet</h2>
+          <p className="text-blue-700/80 mb-8 text-lg max-w-md mx-auto">
             Start exploring recipes and save your favorites to access them later!
           </p>
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => navigate('/select')}
-            className="px-6 py-3 bg-[#D4A574] text-white rounded-lg hover:bg-[#C49564] transition-colors font-medium"
+            className="px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl hover:from-blue-600 hover:to-cyan-600 transition-all font-semibold text-lg shadow-lg"
           >
             Browse Recipes
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {savedRecipes.map((recipe) => {
+          {savedRecipes.map((recipe, index) => {
             const formattedRecipe = formatRecipeForDisplay(recipe)
             return (
-              <div key={recipe.id} className="relative">
+              <motion.div
+                key={recipe.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="relative group"
+              >
                 <Recipe recipe={formattedRecipe} />
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  whileTap={{ scale: 0.9 }}
                   onClick={(e) => handleRemoveRecipe(recipe.id, e)}
-                  className="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors shadow-lg z-10"
+                  className="absolute top-4 right-4 w-10 h-10 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors shadow-xl z-20 backdrop-blur-sm"
                   aria-label="Remove recipe"
                   title="Remove from saved"
                 >
                   ×
-                </button>
-              </div>
+                </motion.button>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  whileHover={{ opacity: 1 }}
+                  className="absolute top-4 left-4 bg-blue-500/90 backdrop-blur-sm text-white px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg z-20"
+                >
+                  <span className="text-xs">⭐</span>
+                  <span className="text-xs font-semibold">Saved</span>
+                </motion.div>
+              </motion.div>
             )
           })}
         </div>
@@ -154,4 +218,3 @@ const SavedRecipesPage = () => {
 }
 
 export default SavedRecipesPage
-
